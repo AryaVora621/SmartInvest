@@ -124,7 +124,7 @@ const UptrendCalculator = ({ stock, userId }: { stock: Stock, userId: string }) 
                 <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}cr` : 'N/A'} />
                 <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}cr` : 'N/A'} />
                 <ResultField label="Upside Potential" value={results.upsidePotential !== null ? `${(results.upsidePotential * 100).toFixed(2)}%` : 'N/A'} />
-                <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `₹${results.expectedPrice.toFixed(2)}` : 'N/A'} />
+                <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `$${results.expectedPrice.toFixed(2)}` : 'N/A'} />
                  {results.expectedPrice !== null && (
                     <div className="pt-2">
                         <Button variant="outline" className="w-full text-white" onClick={handleAddToWatchlist}>
@@ -232,7 +232,7 @@ const LargeOrderCalculator = ({ stock, userId }: { stock: Stock, userId: string 
                 <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}cr` : 'N/A'} />
                 <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}cr` : 'N/A'} />
                 <ResultField label="Upside Potential" value={results.upsidePotential !== null ? `${(results.upsidePotential * 100).toFixed(2)}%` : 'N/A'} />
-                <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `₹${results.expectedPrice.toFixed(2)}` : 'N/A'} />
+                <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `$${results.expectedPrice.toFixed(2)}` : 'N/A'} />
                  {results.expectedPrice !== null && (
                     <div className="pt-2">
                         <Button variant="outline" className="w-full text-white" onClick={handleAddToWatchlist}>
@@ -338,7 +338,7 @@ const CapacityExpansionCalculator = ({ stock, userId }: { stock: Stock, userId: 
                 <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}cr` : 'N/A'} />
                 <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}cr` : 'N/A'} />
                 <ResultField label="Upside Potential" value={results.upsidePotential !== null ? `${(results.upsidePotential * 100).toFixed(2)}%` : 'N/A'} />
-                <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `₹${results.expectedPrice.toFixed(2)}` : 'N/A'} />
+                <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `$${results.expectedPrice.toFixed(2)}` : 'N/A'} />
                  {results.expectedPrice !== null && (
                     <div className="pt-2">
                         <Button variant="outline" className="w-full text-white" onClick={handleAddToWatchlist}>
@@ -509,7 +509,7 @@ const PreferentialCalculator = ({ stock, userId }: { stock: Stock, userId: strin
                 <ResultField label="Hidden Market Cap:" value={results.hiddenMarketCap !== null ? `${results.hiddenMarketCap.toFixed(2)}Cr` : '0Cr'} />
                 <ResultField label="Current Actual Market Cap:" value={results.currentMarketCap !== null ? `${results.currentMarketCap.toFixed(2)}Cr` : '0Cr'} />
                 <ResultField label="Upside Potential:" value={results.upsidePotential !== null ? `${(results.upsidePotential * 100).toFixed(2)}%` : '0%'} />
-                <ResultField label="Expected Price After 1 Year:" value={results.expectedPrice !== null ? `₹${results.expectedPrice.toFixed(2)}` : '₹0'} />
+                <ResultField label="Expected Price After 1 Year:" value={results.expectedPrice !== null ? `$${results.expectedPrice.toFixed(2)}` : '$0'} />
                  {results.expectedPrice !== null && (
                     <div className="pt-2">
                         <Button variant="outline" className="w-full text-white" onClick={handleAddToWatchlist}>

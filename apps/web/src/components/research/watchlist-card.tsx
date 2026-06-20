@@ -289,7 +289,7 @@ export function WatchlistCard({ onStockSelect, userId }: { onStockSelect: (stock
                                 <TableRow key={stock.id} className="text-xs">
                                     <TableCell>{format(new Date(stock.date), 'yyyy-MM-dd')}</TableCell>
                                     <TableCell className="font-medium">{stock.name}</TableCell>
-                                    <TableCell>₹{stock.price.toFixed(2)}</TableCell>
+                                    <TableCell>${stock.price.toFixed(2)}</TableCell>
                                     <TableCell>{stock.pe.toFixed(2)}</TableCell>
                                     <TableCell className="text-right">
                                         <SetAlertsDialog stock={stock} onAlertSave={handleAddAlert} allAlerts={alerts}>

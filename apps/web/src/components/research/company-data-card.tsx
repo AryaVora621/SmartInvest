@@ -250,8 +250,8 @@ const formatFinancialValue = (value: string | number | null | undefined) => {
     if (value === null || value === undefined || value === 'None' || value === 'null') return 'N/A';
     const num = Number(value);
     if (isNaN(num)) return String(value);
-    // Format into Indian crores format
-    return (num / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    // Format large USD figures into billions (header carries the "$B" unit).
+    return (num / 1e9).toLocaleString('en-US', { maximumFractionDigits: 2 });
 };
 
 const FinancialsTable = ({ title, data, metrics, periodsToShow = 10 }: { title: string, data: any[] | undefined, metrics: { key: string, label: string }[], periodsToShow?: number }) => {
@@ -576,8 +576,8 @@ export function CompanyDataCard({ stock, userId, onProsConsData, onSwotData, onS
         const fmtVal = (val: any, isRaw: boolean) => {
             const n = Number(val);
             if (isNaN(n)) return 'N/A';
-            if (isRaw && n > 1e7) return (n / 1e7).toLocaleString('en-IN', { maximumFractionDigits: 0 });
-            if (n >= 1000) return Math.round(n).toLocaleString('en-IN');
+            if (isRaw && n > 1e7) return (n / 1e9).toLocaleString('en-US', { maximumFractionDigits: 2 });
+            if (n >= 1000) return Math.round(n).toLocaleString('en-US');
             return n.toFixed(2);
         };
 
@@ -593,12 +593,12 @@ export function CompanyDataCard({ stock, userId, onProsConsData, onSwotData, onS
                     <TableHeader>
                         <TableRow>
                             <StyledTableHead>Name</StyledTableHead>
-                            <StyledTableHead>CMP Rs.</StyledTableHead>
+                            <StyledTableHead>CMP $</StyledTableHead>
                             <StyledTableHead>P/E</StyledTableHead>
-                            <StyledTableHead>Mar Cap Rs.Cr.</StyledTableHead>
+                            <StyledTableHead>Mkt Cap $B</StyledTableHead>
                             <StyledTableHead>Div Yld %</StyledTableHead>
-                            <StyledTableHead>NP Qtr Rs.Cr.</StyledTableHead>
-                            <StyledTableHead>Sales Qtr Rs.Cr.</StyledTableHead>
+                            <StyledTableHead>NP Qtr $B</StyledTableHead>
+                            <StyledTableHead>Sales Qtr $B</StyledTableHead>
                             <StyledTableHead>ROCE %</StyledTableHead>
                         </TableRow>
                     </TableHeader>

@@ -334,6 +334,10 @@ function UserAuthCard({ users, onLogin, onAddUser, onDeleteUser, currentUser }: 
   );
 }
 
+// No login required: a persistent default profile so the app is usable immediately.
+// Users can still create/switch profiles, but they never have to sign in first.
+const GUEST_USER: UserProfileWithId = { id: 'guest', name: 'Guest', email: '', mobile: '', investableAmount: 100000 };
+
 export default function Home() {
   const [currentUser, setCurrentUser] = useState<UserProfileWithId | null>(null);
   const [users, setUsers] = useState<UserProfileWithId[]>([]);
@@ -386,15 +390,15 @@ export default function Home() {
       setUsers(allUsers);
       
       const savedUserId = localStorage.getItem('currentUserId');
-      if (savedUserId && allUsers.length > 0) {
-        const userToLogin = allUsers.find((u: UserProfileWithId) => u.id === JSON.parse(savedUserId));
-        if (userToLogin) {
-            handleLogin(userToLogin);
-        }
-      }
+      const restored = (savedUserId && allUsers.length > 0)
+        ? allUsers.find((u: UserProfileWithId) => u.id === JSON.parse(savedUserId))
+        : null;
+      // Fall back to the guest profile so no sign-in is ever required.
+      handleLogin(restored || GUEST_USER);
     } catch (error) {
         console.error("Failed to load user data from localStorage", error);
         setUsers([]);
+        handleLogin(GUEST_USER);
     }
   }, [handleLogin]);
 
@@ -431,8 +435,8 @@ export default function Home() {
   }, [users, handleLogin]);
   
   const handleLogout = useCallback(() => {
-    setCurrentUser(null);
     localStorage.removeItem('currentUserId');
+    setCurrentUser(GUEST_USER); // return to guest rather than an empty, gated screen
   }, []);
 
   const handleDeleteUser = useCallback(async (userId: string) => {
@@ -471,9 +475,9 @@ export default function Home() {
       localStorage.setItem(`transactions_${currentUser.id}`, JSON.stringify(newTransactions));
   }, [currentUser]);
 
-  const formatCurrencyNoDecimal = (amount: number) => new Intl.NumberFormat('en-IN', {
+  const formatCurrencyNoDecimal = (amount: number) => new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);

@@ -3,6 +3,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Stock } from '@/types';
+import { US_STOCKS } from '@/lib/us-stocks';
 import { ScreenerCard } from '@/components/research/screener-card';
 import { ScreenerResultsCard } from '@/components/research/screener-results-card';
 import { StockFinderCard } from '@/components/research/stock-finder-card';
@@ -16,18 +17,7 @@ import { WorldMarketOverview } from './research/world-market-overview';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Check, X } from 'lucide-react';
 
-const allStocks: Stock[] = [
-    { symbol: 'RELIANCE.BSE', name: 'Reliance Industries', sector: 'Energy', fairPE: 25, lastQuarterProfit: 18000 },
-    { symbol: 'TCS.BSE', name: 'Tata Consultancy Services', sector: 'IT', fairPE: 30, lastQuarterProfit: 11000 },
-    { symbol: 'HDFCBANK.BSE', name: 'HDFC Bank', sector: 'Finance', fairPE: 22, lastQuarterProfit: 16000 },
-    { symbol: 'INFY.BSE', name: 'Infosys', sector: 'IT', fairPE: 28, lastQuarterProfit: 6100 },
-    { symbol: 'HINDUNILVR.BSE', name: 'Hindustan Unilever', sector: 'FMCG', fairPE: 60, lastQuarterProfit: 2500 },
-    { symbol: 'ICICIBANK.BSE', name: 'ICICI Bank', sector: 'Finance', fairPE: 20, lastQuarterProfit: 10000 },
-    { symbol: 'SBIN.BSE', name: 'State Bank of India', sector: 'Finance', fairPE: 12, lastQuarterProfit: 14000 },
-    { symbol: 'BAJFINANCE.BSE', name: 'Bajaj Finance', sector: 'Finance', fairPE: 35, lastQuarterProfit: 3500 },
-    { symbol: 'KDAIL.BSE', name: 'Krishna Defence & Allied Industries Ltd', sector: 'Defence', fairPE: 40, lastQuarterProfit: 500 },
-    { symbol: 'AMS.BSE', name: 'Apollo Micro Systems Ltd', sector: 'Industrials', fairPE: 38, lastQuarterProfit: 600 },
-];
+const allStocks: Stock[] = US_STOCKS;
 
 const defaultStock: Stock = allStocks[0];
 

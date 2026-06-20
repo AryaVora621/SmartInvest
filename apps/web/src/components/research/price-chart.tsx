@@ -38,11 +38,11 @@ export function PriceChart({ data }: { data: PriceData[] }) {
                     axisLine={false}
                     tickMargin={8}
                     domain={yAxisDomain}
-                    tickFormatter={(value) => `₹${Math.round(value)}`}
+                    tickFormatter={(value) => `$${Math.round(value)}`}
                 />
                 <ChartTooltip
                     cursor={false}
-                    content={<ChartTooltipContent indicator="dot" formatter={(value) => `₹${(value as number).toFixed(2)}`} />}
+                    content={<ChartTooltipContent indicator="dot" formatter={(value) => `$${(value as number).toFixed(2)}`} />}
                 />
                 <defs>
                     <linearGradient id="fillPrice" x1="0" y1="0" x2="0" y2="1">

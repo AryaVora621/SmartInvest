@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, Loader2, TrendingUp, ChevronRight, XCircle } from "lucide-react";
 import type { Stock } from '@/types';
 import { findStocksFromLocalList } from '@/lib/utils';
+import { US_STOCKS } from '@/lib/us-stocks';
 import { Badge } from '@/components/ui/badge';
 import {
   ContextMenu,
@@ -18,22 +19,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 
-const allStocks: Stock[] = [
-    { symbol: 'RELIANCE.BSE', name: 'Reliance Industries', sector: 'Energy', fairPE: 25, lastQuarterProfit: 18000 },
-    { symbol: 'TCS.BSE', name: 'Tata Consultancy Services', sector: 'IT', fairPE: 30, lastQuarterProfit: 11000 },
-    { symbol: 'HDFCBANK.BSE', name: 'HDFC Bank', sector: 'Finance', fairPE: 22, lastQuarterProfit: 16000 },
-    { symbol: 'INFY.BSE', name: 'Infosys', sector: 'IT', fairPE: 28, lastQuarterProfit: 6100 },
-    { symbol: 'HINDUNILVR.BSE', name: 'Hindustan Unilever', sector: 'FMCG', fairPE: 60, lastQuarterProfit: 2500 },
-    { symbol: 'ICICIBANK.BSE', name: 'ICICI Bank', sector: 'Finance', fairPE: 20, lastQuarterProfit: 10000 },
-    { symbol: 'SBIN.BSE', name: 'State Bank of India', sector: 'Finance', fairPE: 12, lastQuarterProfit: 14000 },
-    { symbol: 'BAJFINANCE.BSE', name: 'Bajaj Finance', sector: 'Finance', fairPE: 35, lastQuarterProfit: 3500 },
-    { symbol: 'GOOGL', name: 'Alphabet Inc.', sector: 'Technology', fairPE: 26, lastQuarterProfit: 20000 },
-    { symbol: 'MSFT', name: 'Microsoft Corp.', sector: 'Technology', fairPE: 32, lastQuarterProfit: 22000 },
-    { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology', fairPE: 28, lastQuarterProfit: 24000 },
-    { symbol: 'AMZN', name: 'Amazon.com, Inc.', sector: 'E-commerce', fairPE: 55, lastQuarterProfit: 10000 },
-    { symbol: 'KDAIL.BSE', name: 'Krishna Defence & Allied Industries Ltd', sector: 'Defence', fairPE: 40, lastQuarterProfit: 500 },
-    { symbol: 'AMS.BSE', name: 'Apollo Micro Systems Ltd', sector: 'Industrials', fairPE: 38, lastQuarterProfit: 600 },
-];
+const allStocks: Stock[] = US_STOCKS;
 
 interface StockWithGrowth extends Stock {
   growth: number;
