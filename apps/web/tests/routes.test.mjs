@@ -18,6 +18,7 @@ before(async () => {
     cwd: process.cwd(),
     env: { ...process.env, SECRETS_PATH: SECRETS, AI_RESEARCH_FAKE: '1' },
     stdio: 'ignore',
+    detached: true, // own process group so we can kill the whole tree (npm -> next -> next-server)
   });
   for (let i = 0; i < 120; i++) {
     try { if ((await fetch(`${BASE}/api/settings`)).ok) return; } catch {}
@@ -26,7 +27,7 @@ before(async () => {
   throw new Error('web dev server did not start');
 });
 
-after(() => { srv?.kill('SIGKILL'); });
+after(() => { if (srv?.pid) { try { process.kill(-srv.pid, 'SIGKILL'); } catch {} } });
 
 test('GET /api/settings returns booleans + providers and never a key', async () => {
   const r = await fetch(`${BASE}/api/settings`);

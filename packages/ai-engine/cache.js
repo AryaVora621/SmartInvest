@@ -5,7 +5,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const CACHE_DIR = path.join(__dirname, '.cache');
+// Default to a dir beside this package; override with AI_CACHE_DIR for read-only/serverless
+// hosts (e.g. point it at /tmp on cloud where the package dir is not writable).
+const CACHE_DIR = process.env.AI_CACHE_DIR || path.join(__dirname, '.cache');
 
 function ensureDir() {
   try { fs.mkdirSync(CACHE_DIR, { recursive: true }); } catch (_) {}
