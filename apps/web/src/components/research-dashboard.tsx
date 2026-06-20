@@ -8,6 +8,7 @@ import { ScreenerResultsCard } from '@/components/research/screener-results-card
 import { StockFinderCard } from '@/components/research/stock-finder-card';
 import { CompanyDataCard } from '@/components/research/company-data-card';
 import { AnalysisCard } from '@/components/research/analysis-card';
+import { AiProvidersCard } from '@/components/research/ai-providers-card';
 
 import { WatchlistCard } from '@/components/research/watchlist-card';
 import { FinancialCalculatorsCard } from './research/financial-calculators-card';
@@ -194,6 +195,8 @@ export function ResearchDashboard({ userId }: { userId: string }) {
                     </div>
                 </div>
             )}
+
+            <AiProvidersCard />
 
             {contextMenu && selectedStock && (
                 <ContextMenu
