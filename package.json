@@ -1,0 +1,11 @@
+{
+  "name": "smartinvest",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "test": "npm test -w @smartinvest/ai-engine",
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web"
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+.secrets.json
+.env
+.env.*
+!.env.example
+*.log
+.cache/
+.DS_Store
