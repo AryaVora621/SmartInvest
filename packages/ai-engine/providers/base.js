@@ -24,9 +24,11 @@ function buildPrompt(symbol, context = {}) {
   if (context.sector) facts.push(`Sector: ${context.sector}`);
   const grounding = facts.length
     ? `\nKnown data for grounding (verify if stale):\n${facts.join('\n')}\n` : '\n';
+  const focus = context.instruction
+    ? `\nAdditional focus requested by the user: ${context.instruction}\n` : '';
 
   return `You are a senior US-equity research analyst. Produce a current, well-sourced research report on the US-listed stock ${symbol}.
-${grounding}
+${grounding}${focus}
 Use web search for anything time-sensitive. For every factual claim, cite the source and date inline.
 Write in Markdown with exactly these sections, in order:
 

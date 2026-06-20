@@ -32,3 +32,10 @@ test('base.buildPrompt includes symbol, US framing, all 7 sections, and groundin
   }
   assert.match(p, /170\.2/);
 });
+
+test('base.buildPrompt appends an optional instruction focus line', () => {
+  const p = base.buildPrompt('NVDA', { instruction: 'Focus on swing-trade setups.' });
+  assert.match(p, /Additional focus requested by the user: Focus on swing-trade setups\./);
+  const q = base.buildPrompt('NVDA', {});
+  assert.doesNotMatch(q, /Additional focus/);
+});
