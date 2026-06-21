@@ -706,7 +706,7 @@ export function CompanyDataCard({ stock, userId, onProsConsData, onSwotData, onS
                     </div>
                 </SectionCard>
                 <SectionCard title="Peer Comparison">
-                   {renderPeerTable(null, companyDetails?.peerData)}
+                   {renderPeerTable({ peerData: companyDetails?.peerData }, undefined)}
                 </SectionCard>
 
                 <SectionCard title="Quarterly Results">

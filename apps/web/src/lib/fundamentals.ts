@@ -13,6 +13,7 @@
 
 import YahooFinance from 'yahoo-finance2';
 import { getNextAlphaVantageKey } from '@/lib/api-keys';
+import { US_STOCKS } from '@/lib/us-stocks';
 
 // suppress the library's console notices (survey + the statements-deprecation note)
 const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
@@ -35,10 +36,25 @@ export interface Fundamentals {
   quarterlyReports: StatementRow[];
   balanceSheets: StatementRow[];
   cashFlows: StatementRow[];
+  ratios: { metric: string; values: (string | null)[] }[];
+  peerData: PeerRow[];
   prosCons: { pros: string[]; cons: string[] };
   swot: { strengths: string[]; weaknesses: string[]; opportunities: string[]; threats: string[] };
   shareholding: { periods: string[]; data: { category: string; values: (string | null)[] }[] };
   source: string;
+}
+
+// Shape the peer table consumes (raw-dollar values; the card divides by 1e9 itself).
+export interface PeerRow {
+  Symbol: string;
+  Name: string;
+  CMP: number | null;
+  PERatio: number | null;
+  MarketCapitalization: number | null;
+  DividendYield: number;
+  NetIncome: number | null;
+  TotalRevenue: number | null;
+  ROCE: number | null;
 }
 
 // ---- formatting helpers (quickRatio cells are rendered as raw strings) ----
@@ -157,6 +173,63 @@ function buildSwot(fd: any, sector: string) {
   };
 }
 
+// ---- key ratios (single "Latest" column; shares the period axis with ownership) ----
+
+function buildRatios(sd: any, ks: any, fd: any): { metric: string; values: (string | null)[] }[] {
+  const rows: [string, string | null][] = [
+    ['P/E', fmtNum(sd.trailingPE, 1)],
+    ['Forward P/E', fmtNum(sd.forwardPE ?? ks.forwardPE, 1)],
+    ['P/B', fmtNum(ks.priceToBook, 2)],
+    ['PEG', fmtNum(ks.pegRatio, 2)],
+    ['ROE %', fmtPctFromFraction(fd.returnOnEquity)],
+    ['ROA %', fmtPctFromFraction(fd.returnOnAssets)],
+    ['Gross Margin %', fmtPctFromFraction(fd.grossMargins)],
+    ['Operating Margin %', fmtPctFromFraction(fd.operatingMargins)],
+    ['Net Margin %', fmtPctFromFraction(fd.profitMargins)],
+    ['Debt to Equity', fmtNum(fd.debtToEquity, 1)],
+    ['Current Ratio', fmtNum(fd.currentRatio, 2)],
+    ['Quick Ratio', fmtNum(fd.quickRatio, 2)],
+  ];
+  return rows.map(([metric, value]) => ({ metric, values: [value] }));
+}
+
+// ---- same-sector peers (real US tickers; one batched stat fetch each) ----
+
+async function fetchPeerStat(symbol: string, name: string): Promise<PeerRow | null> {
+  try {
+    const r = await yf.quoteSummary(
+      symbol,
+      { modules: ['price', 'summaryDetail', 'financialData'] },
+      { validateResult: false },
+    );
+    const p = r?.price || {};
+    const sd = r?.summaryDetail || {};
+    const fd = r?.financialData || {};
+    const revenue = fd.totalRevenue ?? null;
+    return {
+      Symbol: symbol,
+      Name: name,
+      CMP: p.regularMarketPrice ?? null,
+      PERatio: sd.trailingPE ?? null,
+      MarketCapitalization: p.marketCap ?? null,
+      DividendYield: (sd.dividendYield || 0) * 100,
+      // Yahoo doesn't expose a clean net-income figure here; derive from margin.
+      NetIncome: revenue !== null && fd.profitMargins !== undefined ? revenue * fd.profitMargins : null,
+      TotalRevenue: revenue,
+      ROCE: fd.returnOnEquity !== undefined ? fd.returnOnEquity * 100 : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function getPeers(selfSymbol: string, sector: string): Promise<PeerRow[]> {
+  const candidates = US_STOCKS.filter(s => s.sector === sector && s.symbol !== selfSymbol).slice(0, 5);
+  if (!candidates.length) return [];
+  const rows = await Promise.all(candidates.map(s => fetchPeerStat(s.symbol, s.name)));
+  return rows.filter((r): r is PeerRow => r !== null);
+}
+
 // ---- main entry ----
 
 export async function getUsFundamentals(
@@ -252,8 +325,9 @@ export async function getUsFundamentals(
   let cashFlows: StatementRow[] = [];
   let source = 'Yahoo Finance';
 
-  // ---- richer statements from Alpha Vantage when a key is configured ----
-  const [income, balance, cash] = await Promise.all([
+  // ---- peers + (optional) AV statements, fetched together ----
+  const [peerData, income, balance, cash] = await Promise.all([
+    getPeers(symbol, fallbackSector),
     fetchAlphaVantage(symbol, 'INCOME_STATEMENT'),
     fetchAlphaVantage(symbol, 'BALANCE_SHEET'),
     fetchAlphaVantage(symbol, 'CASH_FLOW'),
@@ -289,6 +363,8 @@ export async function getUsFundamentals(
     quarterlyReports,
     balanceSheets,
     cashFlows,
+    ratios: buildRatios(sd, ks, fd),
+    peerData,
     prosCons: buildProsCons(fd, name),
     swot: buildSwot(fd, sector),
     shareholding,
