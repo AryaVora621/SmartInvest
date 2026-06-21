@@ -12,8 +12,9 @@
 //   - quickRatio / growth values are pre-formatted display strings.
 
 import YahooFinance from 'yahoo-finance2';
-import { getNextAlphaVantageKey } from '@/lib/api-keys';
+import { getNextAlphaVantageKey, getNextFmpKey } from '@/lib/api-keys';
 import { US_STOCKS } from '@/lib/us-stocks';
+import { cached } from '@/lib/server-cache';
 
 // suppress the library's console notices (survey + the statements-deprecation note)
 const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
@@ -129,6 +130,69 @@ async function fetchAlphaVantage(symbol: string, fn: string): Promise<any | null
   }
 }
 
+// ---- Financial Modeling Prep statements (fallback when AV isn't configured) ----
+
+// FMP uses its own field names; remap them to the AV-style keys the card renders.
+function num(v: any): number | undefined {
+  const n = Number(v);
+  return isFinite(n) && v !== null && v !== '' ? n : undefined;
+}
+
+function mapFmpIncome(reports: any[]): StatementRow[] {
+  return reports.map(r => {
+    const row: StatementRow = { fiscalDateEnding: r.date || r.calendarYear || 'N/A' };
+    const set = (k: string, v: number | undefined) => { if (v !== undefined) row[k] = v; };
+    set('totalRevenue', num(r.revenue));
+    set('operatingIncome', num(r.operatingIncome));
+    set('netIncome', num(r.netIncome));
+    return row;
+  });
+}
+
+function mapFmpBalance(reports: any[]): StatementRow[] {
+  return reports.map(r => {
+    const row: StatementRow = { fiscalDateEnding: r.date || 'N/A' };
+    const set = (k: string, v: number | undefined) => { if (v !== undefined) row[k] = v; };
+    set('totalShareholderEquity', num(r.totalStockholdersEquity));
+    set('retainedEarnings', num(r.retainedEarnings));
+    set('longTermDebt', num(r.longTermDebt));
+    set('totalLiabilities', num(r.totalLiabilities));
+    set('propertyPlantEquipment', num(r.propertyPlantEquipmentNet));
+    set('goodwill', num(r.goodwill));
+    set('investments', num(r.longTermInvestments ?? r.totalInvestments));
+    set('otherCurrentAssets', num(r.otherCurrentAssets));
+    set('totalAssets', num(r.totalAssets));
+    return row;
+  });
+}
+
+function mapFmpCash(reports: any[]): StatementRow[] {
+  return reports.map(r => {
+    const row: StatementRow = { fiscalDateEnding: r.date || 'N/A' };
+    const set = (k: string, v: number | undefined) => { if (v !== undefined) row[k] = v; };
+    set('operatingCashflow', num(r.operatingCashFlow ?? r.netCashProvidedByOperatingActivities));
+    set('cashflowFromInvestment', num(r.netCashUsedForInvestingActivites));
+    set('cashflowFromFinancing', num(r.netCashUsedProvidedByFinancingActivities));
+    set('netIncome', num(r.netIncome));
+    return row;
+  });
+}
+
+async function fetchFmp(symbol: string, statement: string): Promise<any[] | null> {
+  const key = getNextFmpKey();
+  if (!key) return null;
+  try {
+    const url = `https://financialmodelingprep.com/api/v3/${statement}/${encodeURIComponent(symbol)}?limit=5&apikey=${key}`;
+    const res = await fetch(url, { next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    // FMP errors come back as an object with an "Error Message"; valid data is an array.
+    return Array.isArray(data) && data.length ? data : null;
+  } catch {
+    return null;
+  }
+}
+
 // ---- heuristic narrative from the live metrics ----
 
 function buildProsCons(fd: any, name: string): { pros: string[]; cons: string[] } {
@@ -232,7 +296,19 @@ async function getPeers(selfSymbol: string, sector: string): Promise<PeerRow[]> 
 
 // ---- main entry ----
 
+// Cache the assembled result per symbol (~10 min) so repeated card renders don't re-hit
+// Yahoo/AV/FMP. yahoo-finance2 bypasses Next's fetch cache, so this is the only memo layer.
 export async function getUsFundamentals(
+  symbol: string,
+  fallbackName: string,
+  fallbackSector: string,
+): Promise<Fundamentals | null> {
+  return cached(`fund:${symbol.toUpperCase()}`, 10 * 60 * 1000, () =>
+    fetchFundamentals(symbol, fallbackName, fallbackSector),
+  );
+}
+
+async function fetchFundamentals(
   symbol: string,
   fallbackName: string,
   fallbackSector: string,
@@ -339,6 +415,21 @@ export async function getUsFundamentals(
   }
   if (balance?.annualReports?.length) balanceSheets = balance.annualReports.map(cleanAvReport);
   if (cash?.annualReports?.length) cashFlows = cash.annualReports.map(cleanAvReport);
+
+  // ---- FMP fallback: fills the statement tables AV didn't (the common no-AV-key case) ----
+  if ((!balanceSheets.length || !cashFlows.length) && getNextFmpKey()) {
+    const [fmpIncome, fmpBalance, fmpCash] = await Promise.all([
+      fetchFmp(symbol, 'income-statement'),
+      fetchFmp(symbol, 'balance-sheet-statement'),
+      fetchFmp(symbol, 'cash-flow-statement'),
+    ]);
+    let usedFmp = false;
+    // Prefer FMP's annual P&L (it carries operatingIncome that Yahoo's chart lacks).
+    if (fmpIncome && source === 'Yahoo Finance') { annualReports = mapFmpIncome(fmpIncome); usedFmp = true; }
+    if (!balanceSheets.length && fmpBalance) { balanceSheets = mapFmpBalance(fmpBalance); usedFmp = true; }
+    if (!cashFlows.length && fmpCash) { cashFlows = mapFmpCash(fmpCash); usedFmp = true; }
+    if (usedFmp) source = source === 'Yahoo Finance' ? 'FMP + Yahoo Finance' : `${source} + FMP`;
+  }
 
   // ---- US ownership split (replaces promoter/FII/DII) ----
   const inst = ks.heldPercentInstitutions;

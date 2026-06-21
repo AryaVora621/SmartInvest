@@ -7,6 +7,7 @@
 
 import YahooFinance from 'yahoo-finance2';
 import { US_STOCKS } from '@/lib/us-stocks';
+import { cached } from '@/lib/server-cache';
 import type { AlertConfig } from '@/types';
 
 const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
@@ -60,10 +61,15 @@ export async function evaluateAlerts(configs: AlertConfig[]): Promise<TriggeredA
 
   let quotes: any[] = [];
   try {
-    // quote(): validation flags belong in the THIRD arg (moduleOptions); the second is
-    // QuoteOptions and rejects unknown keys.
-    const res = await yf.quote(symbols, undefined, { validateResult: false } as any);
-    quotes = Array.isArray(res) ? res : [res];
+    // Cache the batched quote for 60s, keyed by the symbol set — repeated "Check Now"
+    // clicks (or several configs on the same names) reuse one Yahoo round-trip.
+    const cacheKey = `quote:${[...symbols].sort().join(',')}`;
+    quotes = await cached(cacheKey, 60 * 1000, async () => {
+      // quote(): validation flags belong in the THIRD arg (moduleOptions); the second is
+      // QuoteOptions and rejects unknown keys.
+      const res = await yf.quote(symbols, undefined, { validateResult: false } as any);
+      return Array.isArray(res) ? res : [res];
+    });
   } catch (e) {
     console.error('Alert quote fetch failed:', (e as Error).message);
     return [];
