@@ -1,0 +1,16 @@
+{
+  "name": "@smartinvest/bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted US-market Telegram bot (on-demand research, hourly movers, daily AI digest)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@smartinvest/ai-engine": "*"
+  }
+}
