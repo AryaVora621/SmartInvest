@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { BellPlus, ListPlus, Trash2, BellRing, Mail, Send, History, PlusCircle } from "lucide-react";
+import { BellPlus, ListPlus, Trash2, BellRing, Mail, Send, History, PlusCircle, Settings2 } from "lucide-react";
 import type { Stock, WatchlistStock, AlertConfig, SentAlert } from "@/types";
 import { evaluateAlerts } from "@/actions/alert-actions";
 import {
@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { format, formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { useAlertThresholds } from '@/hooks/use-alert-thresholds';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -161,6 +161,102 @@ const SetAlertsDialog = ({ stock, children, onAlertSave, allAlerts }: { stock: W
             <AddThresholdDialog onOpenChange={setAddThresholdOpen} />
         </Dialog>
         </>
+    );
+};
+
+// Configures both alert delivery channels in one place, next to where alerts are set.
+// Email reuses the same `email_smtp_config` key the portfolio dialog uses; Telegram uses
+// `telegram_config`. Both live in localStorage and are read by the "Check Now" dispatch.
+const DeliverySettingsDialog = () => {
+    const [open, setOpen] = useState(false);
+    const [email, setEmail] = useState({ email: '', appPassword: '' });
+    const [tg, setTg] = useState({ botToken: '', chatId: '' });
+    const [testing, setTesting] = useState<'' | 'email' | 'telegram'>('');
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (!open) return;
+        try { const e = JSON.parse(localStorage.getItem('email_smtp_config') || 'null'); if (e) setEmail(e); } catch {}
+        try { const t = JSON.parse(localStorage.getItem('telegram_config') || 'null'); if (t) setTg(t); } catch {}
+    }, [open]);
+
+    const configured = (() => {
+        let e = false, t = false;
+        try { const v = JSON.parse(localStorage.getItem('email_smtp_config') || 'null'); e = !!(v?.email && v?.appPassword); } catch {}
+        try { const v = JSON.parse(localStorage.getItem('telegram_config') || 'null'); t = !!(v?.botToken && v?.chatId); } catch {}
+        return e || t;
+    })();
+
+    const handleSave = () => {
+        localStorage.setItem('email_smtp_config', JSON.stringify(email));
+        localStorage.setItem('telegram_config', JSON.stringify(tg));
+        setOpen(false);
+        toast({ title: 'Delivery settings saved', description: 'Alerts will use your configured channels.' });
+    };
+
+    const testEmail = async () => {
+        setTesting('email');
+        try {
+            const r = await fetch('/api/send-email', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ to: email.email, subject: 'SmartInvest test alert', text: 'Email alerts are working.', smtpUser: email.email, smtpPass: email.appPassword }),
+            });
+            const d = await r.json();
+            toast(d.success ? { title: 'Test email sent', description: `Check ${email.email}.` } : { title: 'Email failed', description: d.error || 'Check your SMTP settings.', variant: 'destructive' });
+        } catch { toast({ title: 'Error', description: 'Could not send test email.', variant: 'destructive' }); }
+        finally { setTesting(''); }
+    };
+
+    const testTelegram = async () => {
+        setTesting('telegram');
+        try {
+            const r = await fetch('/api/send-telegram', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ botToken: tg.botToken, chatId: tg.chatId, text: 'SmartInvest test alert — Telegram alerts are working.' }),
+            });
+            const d = await r.json();
+            toast(d.success ? { title: 'Test message sent', description: 'Check your Telegram chat.' } : { title: 'Telegram failed', description: d.error || 'Check your bot token and chat ID.', variant: 'destructive' });
+        } catch { toast({ title: 'Error', description: 'Could not reach Telegram.', variant: 'destructive' }); }
+        finally { setTesting(''); }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7" title="Alert delivery settings">
+                    <Settings2 size={14} className={configured ? 'text-green-500' : ''} />
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Alert Delivery Settings</DialogTitle>
+                    <DialogDescription>Configure where triggered alerts are sent. Credentials stay in your browser and are sent to the server only to deliver a message.</DialogDescription>
+                </DialogHeader>
+                <div className="py-2 space-y-4">
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold flex items-center gap-2"><Mail size={14} /> Email (Gmail SMTP)</h4>
+                        <Input value={email.email} onChange={e => setEmail(p => ({ ...p, email: e.target.value }))} placeholder="your@gmail.com" />
+                        <Input type="password" value={email.appPassword} onChange={e => setEmail(p => ({ ...p, appPassword: e.target.value }))} placeholder="16-char Gmail App Password" />
+                        <Button variant="outline" size="sm" className="w-full" onClick={testEmail} disabled={testing !== '' || !email.email || !email.appPassword}>
+                            {testing === 'email' ? 'Sending…' : 'Send Test Email'}
+                        </Button>
+                    </div>
+                    <Separator />
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold flex items-center gap-2"><Send size={14} /> Telegram</h4>
+                        <Input value={tg.botToken} onChange={e => setTg(p => ({ ...p, botToken: e.target.value }))} placeholder="Bot token (from @BotFather)" />
+                        <Input value={tg.chatId} onChange={e => setTg(p => ({ ...p, chatId: e.target.value }))} placeholder="Chat ID (from @userinfobot)" />
+                        <Button variant="outline" size="sm" className="w-full" onClick={testTelegram} disabled={testing !== '' || !tg.botToken || !tg.chatId}>
+                            {testing === 'telegram' ? 'Sending…' : 'Send Test Message'}
+                        </Button>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button onClick={handleSave}>Save</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -325,12 +421,15 @@ export function WatchlistCard({ onStockSelect, userId }: { onStockSelect: (stock
     return (
         <Card>
             <CardHeader>
-                <div className="flex items-baseline gap-2">
-                    <CardTitle className="font-headline text-base flex items-baseline gap-2">
-                        <ListPlus className="text-primary" />
-                        Smart Watchlist
-                    </CardTitle>
-                    <CardDescription className="text-xs">Monitor stocks and set custom alerts to track opportunities.</CardDescription>
+                <div className="flex items-baseline justify-between gap-2">
+                    <div className="flex items-baseline gap-2">
+                        <CardTitle className="font-headline text-base flex items-baseline gap-2">
+                            <ListPlus className="text-primary" />
+                            Smart Watchlist
+                        </CardTitle>
+                        <CardDescription className="text-xs">Monitor stocks and set custom alerts to track opportunities.</CardDescription>
+                    </div>
+                    <DeliverySettingsDialog />
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
