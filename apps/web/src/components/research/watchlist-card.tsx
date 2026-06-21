@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { BellPlus, ListPlus, Trash2, BellRing, Mail, Send, History, PlusCircle } from "lucide-react";
 import type { Stock, WatchlistStock, AlertConfig, SentAlert } from "@/types";
+import { evaluateAlerts } from "@/actions/alert-actions";
 import {
   Select,
   SelectContent,
@@ -168,6 +169,7 @@ export function WatchlistCard({ onStockSelect, userId }: { onStockSelect: (stock
     const [watchlist, setWatchlist] = useState<WatchlistStock[]>([]);
     const [alerts, setAlerts] = useState<AlertConfig[]>([]);
     const [sentAlerts, setSentAlerts] = useState<SentAlert[]>([]);
+    const [checking, setChecking] = useState(false);
     
     const loadData = useCallback(() => {
         if (!userId) return;
@@ -261,6 +263,65 @@ export function WatchlistCard({ onStockSelect, userId }: { onStockSelect: (stock
         toast({ title: "Sent Alert Cleared" });
     }, [userId, sentAlerts, toast]);
 
+    // Evaluate every configured alert against live Yahoo quotes, dispatch the ones that
+    // fire over whatever channels the user has credentials for, and record them.
+    const handleCheckNow = useCallback(async () => {
+        if (!userId || !alerts.length) return;
+        setChecking(true);
+        try {
+            const triggered = await evaluateAlerts(alerts);
+            if (!triggered.length) {
+                toast({ title: "No alerts triggered", description: "Checked live prices — nothing met your thresholds right now." });
+                return;
+            }
+
+            let emailCfg: any = null;
+            let tgCfg: any = null;
+            try { emailCfg = JSON.parse(localStorage.getItem('email_smtp_config') || 'null'); } catch {}
+            try { tgCfg = JSON.parse(localStorage.getItem('telegram_config') || 'null'); } catch {}
+
+            const newEntries: SentAlert[] = [];
+            let nextId = Date.now();
+            for (const t of triggered) {
+                const sentVia: ('email' | 'telegram')[] = [];
+                if (t.via.includes('email') && emailCfg?.email && emailCfg?.appPassword) {
+                    try {
+                        const r = await fetch('/api/send-email', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ to: emailCfg.email, subject: `Stock Alert: ${t.stockName}`, text: t.message, smtpUser: emailCfg.email, smtpPass: emailCfg.appPassword }),
+                        });
+                        if ((await r.json()).success) sentVia.push('email');
+                    } catch {}
+                }
+                if (t.via.includes('telegram') && tgCfg?.botToken && tgCfg?.chatId) {
+                    try {
+                        const r = await fetch('/api/send-telegram', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ botToken: tgCfg.botToken, chatId: tgCfg.chatId, text: t.message }),
+                        });
+                        if ((await r.json()).success) sentVia.push('telegram');
+                    } catch {}
+                }
+                newEntries.push({ id: nextId++, stockName: t.stockName, message: t.message, sentVia, time: new Date(), source: 'WL' });
+            }
+
+            const stored = JSON.parse(localStorage.getItem(`sentAlerts_${userId}`) || '[]');
+            const updated = [...newEntries, ...stored];
+            localStorage.setItem(`sentAlerts_${userId}`, JSON.stringify(updated));
+            setSentAlerts(updated.slice(0, 5));
+
+            const dispatched = newEntries.filter(e => e.sentVia.length).length;
+            toast({
+                title: `${triggered.length} alert${triggered.length > 1 ? 's' : ''} triggered`,
+                description: dispatched ? `${dispatched} sent via your configured channels.` : "Recorded below. Add email/Telegram credentials to auto-send.",
+            });
+        } catch (e) {
+            toast({ title: "Check failed", description: e instanceof Error ? e.message : "Could not evaluate alerts.", variant: "destructive" });
+        } finally {
+            setChecking(false);
+        }
+    }, [userId, alerts, toast]);
+
     return (
         <Card>
             <CardHeader>
@@ -315,7 +376,12 @@ export function WatchlistCard({ onStockSelect, userId }: { onStockSelect: (stock
                 
                 {alerts.length > 0 &&
                     <div className="space-y-2">
-                        <h4 className="font-semibold flex items-center gap-2 text-sm"><BellRing size={14} /> Active Alerts</h4>
+                        <div className="flex items-center justify-between">
+                            <h4 className="font-semibold flex items-center gap-2 text-sm"><BellRing size={14} /> Active Alerts</h4>
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={handleCheckNow} disabled={checking}>
+                                <BellRing size={12} /> {checking ? 'Checking…' : 'Check Now'}
+                            </Button>
+                        </div>
                         <ScrollArea className="h-32">
                         {alerts.map((alert, index) => (
                             <div key={index} className="flex items-center justify-between p-2 bg-secondary/50 rounded-md text-xs mb-1">
