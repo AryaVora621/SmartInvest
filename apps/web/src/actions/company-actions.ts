@@ -1,6 +1,7 @@
 'use server';
 
 import { US_STOCKS } from '@/lib/us-stocks';
+import { getUsFundamentals } from '@/lib/fundamentals';
 
 export type QuickRatioData = Record<string, string | null>;
 
@@ -125,55 +126,46 @@ function parseFinancialValue(val: any): number {
 
 
 
-function mapScrapedToCompanyDetails(scraped: any): CompanyDetails {
-    const growth: GrowthData = {
-        sales: Object.keys(scraped.growth.sales).length ? scraped.growth.sales : {},
-        profit: Object.keys(scraped.growth.profit).length ? scraped.growth.profit : {},
-        cagr: Object.keys(scraped.growth.cagr).length ? scraped.growth.cagr : {},
-        roe: Object.keys(scraped.growth.roe).length ? scraped.growth.roe : {},
-    };
-
-    const mapRows = (rows: ScrapedCompanyData['quarterlyReports']) =>
-        rows.map(row => {
-            const obj: Record<string, string | null> = { metric: row.metric };
-            row.values.forEach((v, i) => { obj[`val_${i}`] = v; });
-            return obj;
-        });
-
-    return {
-        name: scraped.name,
-        symbol: scraped.symbol,
-        sector: scraped.sector,
-        quickRatio: scraped.quickRatios,
-        growth,
-        ratios: scraped.ratiosTable.map(r => ({ metric: r.metric, values: r.values })),
-        shareholding: scraped.shareholding,
-        prosCons: scraped.prosCons,
-        swot: {
-            strengths: ['Strong market position in ' + scraped.sector + ' sector', 'Experienced management team', 'Solid financial fundamentals'],
-            weaknesses: ['High valuation multiples', 'Dependence on domestic market', 'Regulatory compliance costs'],
-            opportunities: ['Expansion into new markets', 'Digital transformation', 'Strategic acquisitions'],
-            threats: ['Intense competition', 'Regulatory changes', 'Economic slowdown risks'],
-        },
-        peerData: scraped.peerData || [],
-        quarterlyReports: mapRows(scraped.quarterlyReports),
-        annualReports: mapRows(scraped.annualReports),
-        balanceSheets: mapRows(scraped.balanceSheets),
-        cashFlows: mapRows(scraped.cashFlows),
-    };
-}
-
 export async function getCompanyDetails(stockName: string): Promise<{ success: boolean; data?: CompanyDetails; error?: string }> {
-    try {
-        const stock = findStock(stockName);
-        if (!stock) return { success: false, error: `Could not find stock matching "${stockName}".` };
+    // Resolve the input (a company name or ticker) to a US symbol. Known names map
+    // through US_STOCKS; anything else is treated as a raw ticker (Yahoo will reject
+    // garbage, and we fall back to the empty shell below).
+    const stock = findStock(stockName) || {
+        name: stockName,
+        symbol: stockName.trim().toUpperCase().replace(/[^A-Z.]/g, ''),
+        sector: 'Unknown',
+    };
 
-        return { success: true, data: getMockCompanyDetails(stock) };
+    try {
+        const f = await getUsFundamentals(stock.symbol, stock.name, stock.sector);
+        if (f) {
+            return {
+                success: true,
+                data: {
+                    name: f.meta.name,
+                    symbol: f.meta.symbol,
+                    sector: f.meta.sector,
+                    quickRatio: f.quickRatio,
+                    growth: f.growth,
+                    ratios: [],
+                    shareholding: f.shareholding,
+                    prosCons: f.prosCons,
+                    swot: f.swot,
+                    peerData: [],
+                    quarterlyReports: f.quarterlyReports,
+                    annualReports: f.annualReports,
+                    balanceSheets: f.balanceSheets,
+                    cashFlows: f.cashFlows,
+                },
+            };
+        }
     } catch (error) {
-        console.error('Error in getCompanyDetails:', error);
-        const stock = findStock(stockName);
-        return { success: true, data: getMockCompanyDetails(stock || { name: stockName, symbol: stockName, sector: 'Unknown' }) };
+        console.error('Error fetching fundamentals:', error);
     }
+
+    // Yahoo unreachable (offline / delisted / bad ticker): return an empty shell so
+    // the card still renders its labels rather than erroring out.
+    return { success: true, data: getMockCompanyDetails(stock) };
 }
 
 function getMockCompanyDetails(stock: { name: string; symbol: string; sector: string }): CompanyDetails {

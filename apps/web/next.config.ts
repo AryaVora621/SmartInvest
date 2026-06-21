@@ -13,7 +13,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   // Prefer running the engine as a real Node require (production honors this); the env
   // pins above are the belt-and-suspenders that also cover Turbopack dev.
-  serverExternalPackages: ['@smartinvest/ai-engine'],
+  // yahoo-finance2 (US fundamentals) does dynamic requires that Turbopack can't bundle.
+  serverExternalPackages: ['@smartinvest/ai-engine', 'yahoo-finance2'],
   typescript: {
     ignoreBuildErrors: true,
   },
