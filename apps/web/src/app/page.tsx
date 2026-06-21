@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User, LogIn, TrendingUp, TrendingDown, Landmark, Banknote, Briefcase, PlusCircle, LineChart, Trash2, Edit, PiggyBank, KeyRound, ExternalLink, RefreshCw } from 'lucide-react';
 
 import { Logo } from '@/components/logo';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { ResearchDashboard } from '@/components/research-dashboard';
 import { PortfolioDashboard } from '@/components/portfolio-dashboard';
 import { LedgerDashboard } from '@/components/ledger-dashboard';
@@ -492,7 +493,7 @@ export default function Home() {
                   <Logo className="h-8 w-8 text-white" />
                   <div className="hidden md:flex items-baseline gap-2">
                     <h1 className="font-headline text-sm font-bold tracking-tight text-white">
-                        AI SMARTINVEST
+                        SMARTINVEST AI
                     </h1>
                     <p className="text-xs text-white">Your AI Powered Investment Analyst</p>
                   </div>
@@ -503,6 +504,7 @@ export default function Home() {
                 </div>
                 
                 <div className='flex items-center gap-4'>
+                    <ThemeToggle />
                     {currentUser ? (
                       <div className="flex items-center gap-2">
                         <div className="text-right">
