@@ -1,6 +1,6 @@
 'use server';
 
-
+import { US_STOCKS } from '@/lib/us-stocks';
 
 export type QuickRatioData = Record<string, string | null>;
 
@@ -57,18 +57,7 @@ export type CompanyDetails = {
   cashFlows: any[];
 };
 
-const allStocks: { symbol: string; name: string; sector: string }[] = [
-  { symbol: 'RELIANCE.BSE', name: 'Reliance Industries', sector: 'Energy' },
-  { symbol: 'TCS.BSE', name: 'Tata Consultancy Services', sector: 'IT' },
-  { symbol: 'HDFCBANK.BSE', name: 'HDFC Bank', sector: 'Finance' },
-  { symbol: 'INFY.BSE', name: 'Infosys', sector: 'IT' },
-  { symbol: 'HINDUNILVR.BSE', name: 'Hindustan Unilever', sector: 'FMCG' },
-  { symbol: 'ICICIBANK.BSE', name: 'ICICI Bank', sector: 'Finance' },
-  { symbol: 'SBIN.BSE', name: 'State Bank of India', sector: 'Finance' },
-  { symbol: 'BAJFINANCE.BSE', name: 'Bajaj Finance', sector: 'Finance' },
-  { symbol: 'KDAIL.BSE', name: 'Krishna Defence & Allied Industries Ltd', sector: 'Defence' },
-  { symbol: 'AMS.BSE', name: 'Apollo Micro Systems Ltd', sector: 'Industrials' },
-];
+const allStocks: { symbol: string; name: string; sector: string }[] = US_STOCKS;
 
 function findStock(name: string) {
   const lower = name.toLowerCase();
@@ -178,26 +167,6 @@ export async function getCompanyDetails(stockName: string): Promise<{ success: b
     try {
         const stock = findStock(stockName);
         if (!stock) return { success: false, error: `Could not find stock matching "${stockName}".` };
-
-        const isIndianStock = stock.symbol.endsWith('.BSE') || stock.symbol.endsWith('.NS') || stock.symbol.endsWith('.BO');
-
-        if (isIndianStock) {
-            let scraped = null;
-            try {
-                const { scrapeScreener } = await import('@/lib/screener-scraper');
-                scraped = await scrapeScreener(stock.symbol, stock.name);
-            } catch (e) {
-                console.warn('Screener scraper unavailable:', e);
-            }
-            if (scraped) {
-                try {
-                    const data = mapScrapedToCompanyDetails(scraped);
-                    return { success: true, data };
-                } catch (e) {
-                    console.error('Error processing scraped data:', e);
-                }
-            }
-        }
 
         return { success: true, data: getMockCompanyDetails(stock) };
     } catch (error) {

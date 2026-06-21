@@ -26,7 +26,7 @@ const typeConfig = {
 const blueBtn = 'bg-blue-600 hover:bg-blue-700 text-white';
 
 function formatINR(amount: number) {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
 }
 
 export function CashbookDashboard() {
@@ -93,7 +93,7 @@ export function CashbookDashboard() {
             toast({ title: "No Data", description: "No entries to export.", variant: "destructive" });
             return;
         }
-        const headers = ["Date", "Type", "CREDIT (IN)", "DEBIT (OUT)", "Running Balance (₹)"];
+        const headers = ["Date", "Type", "CREDIT (IN)", "DEBIT (OUT)", "Running Balance ($)"];
         const csvRows = [headers.join(',')];
         let bal = 0;
         sortedEntries.forEach(e => {
@@ -121,7 +121,7 @@ export function CashbookDashboard() {
                 <CardHeader>
                     <div className="flex items-baseline gap-2">
                         <CardTitle className="font-headline text-base">Personal A/C</CardTitle>
-                        <CardDescription className="text-xs">Track fund movements between ICICI Bank and Broker's A/C, plus dividends.</CardDescription>
+                        <CardDescription className="text-xs">Track fund movements between your bank and Broker's A/C, plus dividends.</CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -164,7 +164,7 @@ export function CashbookDashboard() {
                                 </select>
                             </div>
                             <div className="space-y-1">
-                                <Label className="text-xs text-white">Amount (₹)</Label>
+                                <Label className="text-xs text-white">Amount ($)</Label>
                                 <Input type="number" step="0.01" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} className="text-white placeholder:text-white" />
                             </div>
                             <div className="flex items-end">
@@ -192,7 +192,7 @@ export function CashbookDashboard() {
                                     <TableHead className="border text-black">Type</TableHead>
                                     <TableHead className="border text-right text-green-600">CREDIT (IN)</TableHead>
                                     <TableHead className="border text-right text-red-600">DEBIT (OUT)</TableHead>
-                                    <TableHead className="border text-right text-black">Running Balance (₹)</TableHead>
+                                    <TableHead className="border text-right text-black">Running Balance ($)</TableHead>
                                     <TableHead className="border text-center text-black">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>

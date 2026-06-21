@@ -16,8 +16,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import { cn } from '@/lib/utils';
 
 const initialScreeners: Screener[] = [
-    { id: '1', name: '0001-BJ - LOW-COST GOOD MICRO', criteria: 'Market Cap < 5000 Cr AND P/E Ratio < 15 AND ROCE > 15%' },
-    { id: '2', name: '0002-US - Tech Growth Stars', criteria: 'Sector = "Technology" AND Sales Growth (3Y) > 20% AND Country = "USA"' },
+    { id: '1', name: '0001 - Value Large Caps', criteria: 'Market Cap > $10B AND P/E Ratio < 15 AND ROCE > 15%' },
+    { id: '2', name: '0002 - Tech Growth Stars', criteria: 'Sector = "Technology" AND Sales Growth (3Y) > 20% AND Country = "USA"' },
 ];
 
 export function ScreenerCard({ onFindStocks, userId }: { onFindStocks: (criteria: string) => void, userId: string }) {
@@ -230,7 +230,7 @@ function AddEditScreenerDialog({ children, screener, onSave }: { children: React
                             </div>
                         </CollapsibleTrigger>
                         <CollapsibleContent className="mt-2">
-                             <Textarea placeholder="Market Cap < 5000 Cr AND P/E Ratio < 15..." rows={6} value={criteria} onChange={e => setCriteria(e.target.value)} />
+                             <Textarea placeholder="Market Cap > $10B AND P/E Ratio < 15..." rows={6} value={criteria} onChange={e => setCriteria(e.target.value)} />
                         </CollapsibleContent>
                     </Collapsible>
                 </div>

@@ -39,11 +39,8 @@ export const TechnicalAnalysisChart = ({ stock }: { stock: Stock }) => {
     const [range, setRange] = useState('1Y');
     const [error, setError] = useState(false);
 
-    const tradingViewSymbol = stock.symbol.includes('.BSE')
-        ? `BSE:${stock.symbol.replace('.BSE', '')}`
-        : stock.symbol.includes('.NSE') || stock.symbol.includes('.NS')
-            ? `NSE:${stock.symbol.replace(/\.(NSE|NS)$/i, '')}`
-            : `NASDAQ:${stock.symbol}`;
+    // Bare US ticker; TradingView resolves the listing exchange (NASDAQ/NYSE/...) itself.
+    const tradingViewSymbol = stock.symbol;
 
     useEffect(() => {
         setError(false);

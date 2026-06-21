@@ -98,16 +98,16 @@ function ApiKeysManager() {
         <div className="space-y-4 pt-4">
             <h3 className="font-semibold text-sm flex items-center gap-2"><KeyRound size={16}/> Manage API Keys (Global)</h3>
              <p className="text-xs text-muted-foreground">
-                To fetch real-time data for Indian stocks, get a free key from {' '}
-                <a href="https://stock.indianapi.in/" target="_blank" rel="noopener noreferrer" className="text-primary underline flex items-center gap-1">
-                    indianapi.in <ExternalLink size={12}/>
-                </a> and add it below with the provider name `indianapi.in`.
+                Optional data-provider keys (e.g. a free {' '}
+                <a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener noreferrer" className="text-primary underline flex items-center gap-1">
+                    Alpha Vantage <ExternalLink size={12}/>
+                </a> key with the provider name `alphavantage`). AI provider keys live in the AI Providers card on the Research tab.
             </p>
             <div className="p-4 border rounded-lg bg-secondary/30 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-2 items-end">
                     <div className='space-y-1'>
                         <Label htmlFor="provider" className="text-xs">Service Provider</Label>
-                        <Input id="provider" value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="e.g. indianapi.in" />
+                        <Input id="provider" value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="e.g. alphavantage" />
                     </div>
                      <div className='space-y-1'>
                         <Label htmlFor="key" className="text-xs">API Key</Label>

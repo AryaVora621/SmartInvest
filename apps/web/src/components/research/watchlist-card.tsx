@@ -30,9 +30,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 const alertPeriods = ["Auto", "15 min.", "30 min.", "1 hour", "1 Day", "Week", "4 Week", "52 Week"];
 
 const initialSentAlerts: SentAlert[] = [
-    { id: 1, stockName: 'Reliance Industries', message: 'Price Gain > 10%', sentVia: ['email', 'telegram'], time: new Date(Date.now() - 2 * 60 * 60 * 1000), source: 'Port' },
-    { id: 2, stockName: 'Infosys', message: 'Near 52 Week High', sentVia: ['email'], time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), source: 'WL' },
-    { id: 3, stockName: 'HDFC Bank', message: 'Golden Crossover', sentVia: ['telegram'], time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), source: 'Port' },
+    { id: 1, stockName: 'Apple', message: 'Price Gain > 10%', sentVia: ['email', 'telegram'], time: new Date(Date.now() - 2 * 60 * 60 * 1000), source: 'Port' },
+    { id: 2, stockName: 'NVIDIA', message: 'Near 52 Week High', sentVia: ['email'], time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), source: 'WL' },
+    { id: 3, stockName: 'JPMorgan Chase', message: 'Golden Crossover', sentVia: ['telegram'], time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), source: 'Port' },
 ];
 
 const AddThresholdDialog = ({ onOpenChange }: { onOpenChange: (open: boolean) => void }) => {

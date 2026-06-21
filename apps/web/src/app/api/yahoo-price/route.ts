@@ -6,8 +6,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'symbol is required' }, { status: 400 });
     }
     try {
-        const ySymbol = symbol.replace(/\.BSE$/i, '.BO').replace(/\.NSE$/i, '.NS');
-        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ySymbol)}?interval=1d&range=1d`;
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
         const res = await fetch(url, {
             headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
         });

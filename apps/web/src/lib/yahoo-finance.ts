@@ -1,7 +1,6 @@
+// US equities use plain Yahoo tickers (AAPL, MSFT, ...); pass them through as-is.
 export function normalizeSymbol(symbol: string): string {
-  if (symbol.endsWith('.BSE')) return symbol.replace('.BSE', '.BO');
-  if (symbol.endsWith('.NSE')) return symbol.replace('.NSE', '.NS');
-  return symbol;
+  return symbol.trim().toUpperCase();
 }
 
 export interface QuoteResult {
@@ -156,7 +155,7 @@ export async function getFinancials(symbol: string): Promise<{
   }
 }
 
-export async function getExchangeRate(from: string = 'USD', to: string = 'INR'): Promise<number | null> {
+export async function getExchangeRate(from: string = 'USD', to: string = 'USD'): Promise<number | null> {
   try {
     const pair = `${from}${to}=X`;
     const quote = await getQuote(pair);

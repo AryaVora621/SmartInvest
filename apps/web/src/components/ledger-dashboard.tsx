@@ -240,7 +240,7 @@ export function LedgerDashboard({ transactions, userId }: { transactions: Transa
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
     }
 
     type TradeEntry = {
@@ -349,8 +349,8 @@ export function LedgerDashboard({ transactions, userId }: { transactions: Transa
     const fundMovementSummary = useMemo(() => {
         const types = ['bank-to-broker', 'broker-to-bank', 'dividend'];
         const labels: Record<string, string> = {
-            'bank-to-broker': 'RECEIVED FROM ICICI BANK',
-            'broker-to-bank': 'SENT TO ICICI BANK',
+            'bank-to-broker': 'RECEIVED FROM BANK',
+            'broker-to-bank': 'SENT TO BANK',
             'dividend': 'DIVIDEND RECEIVED',
         };
         let combined: any[] = [];
@@ -413,7 +413,7 @@ export function LedgerDashboard({ transactions, userId }: { transactions: Transa
                                                 <TableRow key={e.id}>
                                                     <TableCell className="border">{e.date}</TableCell>
                                                     <TableCell className="border">
-                                                        <Badge variant={e.transactionLabel === 'STOCK SOLD' || e.transactionLabel === 'RECEIVED FROM ICICI BANK' || e.transactionLabel === 'DIVIDEND RECEIVED' ? 'default' : 'destructive'} className={cn("capitalize whitespace-nowrap", e.transactionLabel === 'STOCK SOLD' && 'bg-green-100 text-green-800')}>{e.transactionLabel}</Badge>
+                                                        <Badge variant={e.transactionLabel === 'STOCK SOLD' || e.transactionLabel === 'RECEIVED FROM BANK' || e.transactionLabel === 'DIVIDEND RECEIVED' ? 'default' : 'destructive'} className={cn("capitalize whitespace-nowrap", e.transactionLabel === 'STOCK SOLD' && 'bg-green-100 text-green-800')}>{e.transactionLabel}</Badge>
                                                     </TableCell>
                                                     <TableCell className="border text-right text-green-600 font-medium">{e.fundsReceived > 0 ? formatCurrency(e.fundsReceived) : ''}</TableCell>
                                                     <TableCell className="border text-right text-red-600 font-medium">{e.fundsSent > 0 ? formatCurrency(e.fundsSent) : ''}</TableCell>

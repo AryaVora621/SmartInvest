@@ -18,7 +18,7 @@ import { Checkbox } from './ui/checkbox';
 import { Separator } from './ui/separator';
 
 const defaultFamilyMembers = ["B. Patel", "Kirtida"];
-const defaultBanks = ["Axis", "HDFC", "ICICI", "SBI"];
+const defaultBanks = ["Chase", "Bank of America", "Wells Fargo", "Citi"];
 
 const defaultPpf = { accountNumber: "PPF987654321", currentValue: "625000", annualContribution: "150000", currentRate: "7.1" };
 const defaultNps = { accountNumber: "NPS123456789", currentValue: "850000", monthlyContribution: "10000", expectedReturn: "8.2" };
@@ -32,7 +32,7 @@ const formatCurrency = (amount: number, withPaise = true) => {
         minimumFractionDigits: withPaise ? 2 : 0,
         maximumFractionDigits: withPaise ? 2 : 0,
     };
-    return new Intl.NumberFormat('en-IN', options).format(amount);
+    return new Intl.NumberFormat('en-US', options).format(amount);
 };
 
 
@@ -224,7 +224,7 @@ const WithdrawDepositDialog = ({ children, onWithdraw, familyMembers, deposits }
                             <SelectContent>
                                 {memberDeposits.map(d => (
                                     <SelectItem key={d.id} value={d.id}>
-                                        {d.bankName} - ₹{formatCurrency(d.principal, false)} @ {d.interestRate}%
+                                        {d.bankName} - ${formatCurrency(d.principal, false)} @ {d.interestRate}%
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -233,7 +233,7 @@ const WithdrawDepositDialog = ({ children, onWithdraw, familyMembers, deposits }
                     {selectedDeposit && (
                          <div className="grid grid-cols-2 gap-4 text-sm p-2 bg-secondary/50 rounded-md">
                             <p><strong>Maturity Date:</strong> {selectedDeposit.maturityDate}</p>
-                            <p><strong>Maturity Amount:</strong> ₹{formatCurrency(selectedDeposit.maturityAmount)}</p>
+                            <p><strong>Maturity Amount:</strong> ${formatCurrency(selectedDeposit.maturityAmount)}</p>
                         </div>
                     )}
                     <div className="grid grid-cols-2 gap-4">
@@ -242,7 +242,7 @@ const WithdrawDepositDialog = ({ children, onWithdraw, familyMembers, deposits }
                             <Input id="withdrawalDate" type="date" value={withdrawalDate} onChange={e => setWithdrawalDate(e.target.value)} />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="withdrawalAmount">Withdrawal Amount (₹)</Label>
+                            <Label htmlFor="withdrawalAmount">Withdrawal Amount ($)</Label>
                             <Input id="withdrawalAmount" type="number" value={withdrawalAmount} onChange={e => setWithdrawalAmount(e.target.value)} placeholder="e.g. 50000" />
                         </div>
                     </div>
@@ -455,7 +455,7 @@ const AddEditDepositDialog = ({ children, deposit, onSave, familyMembers, banks 
 
                      <div className="grid grid-cols-1 md:grid-cols-[1fr] gap-4 items-end">
                         <div className="space-y-2">
-                            <Label htmlFor="principal">Principal Amount (₹)</Label>
+                            <Label htmlFor="principal">Principal Amount ($)</Label>
                             <Input id="principal" type="number" value={principal} onChange={e => setPrincipal(e.target.value)} placeholder="e.g. 50000" className="text-white no-spinner placeholder:text-white" />
                         </div>
                     </div>
@@ -596,7 +596,7 @@ const RetirementPlansCard = ({ deposits, userId }: { deposits: FixedDeposit[], u
     const PortfolioTotalRow = ({ label, value }: { label: string, value: number }) => (
         <div className="flex justify-between items-center py-2 px-3 border rounded-md bg-secondary/50">
             <span className="text-muted-foreground">{label}</span>
-            <span className="font-mono font-medium">₹ {formatCurrency(value, false)}</span>
+            <span className="font-mono font-medium">$ {formatCurrency(value, false)}</span>
         </div>
     );
 
@@ -626,7 +626,7 @@ const RetirementPlansCard = ({ deposits, userId }: { deposits: FixedDeposit[], u
                             <Separator className="my-2 bg-border"/>
                             <div className="flex justify-between items-center text-base pt-1 px-3">
                                 <span className="font-bold">Grand Total</span>
-                                <span className="font-bold font-mono">₹ {formatCurrency(grandTotal, false)}</span>
+                                <span className="font-bold font-mono">$ {formatCurrency(grandTotal, false)}</span>
                             </div>
                         </div>
                     </div>
@@ -638,9 +638,9 @@ const RetirementPlansCard = ({ deposits, userId }: { deposits: FixedDeposit[], u
                             icon={<Landmark />}
                         >
                             <DataField label="Total FDs" value={`${deposits.length} FDs`} />
-                            <DataField label="Current Value" value={`₹ ${formatCurrency(totalPrincipal, false)}`} />
+                            <DataField label="Current Value" value={`$ ${formatCurrency(totalPrincipal, false)}`} />
                             <DataField label="Average Rate" value={`${averageRate.toFixed(2)}%`} />
-                            <DataField label="Maturity Value" value={`₹ ${formatCurrency(totalMaturity, false)}`} />
+                            <DataField label="Maturity Value" value={`$ ${formatCurrency(totalMaturity, false)}`} />
                         </RetirementPlanItem>
                         
                         <div className="flex justify-end gap-4 py-2">
@@ -726,7 +726,7 @@ const ResultRow = ({ label, value, isCurrency = true, isNegative = false }: { la
     <div className="flex items-center justify-between py-2 border-b">
         <p className="text-sm text-muted-foreground">{label}</p>
         <p className={cn("text-sm font-bold", isNegative && "text-red-500")}>
-            {isCurrency ? `₹ ${Number(value).toLocaleString('en-IN', {maximumFractionDigits: 0})}` : value}
+            {isCurrency ? `$ ${Number(value).toLocaleString('en-US', {maximumFractionDigits: 0})}` : value}
         </p>
     </div>
 );
@@ -821,8 +821,8 @@ const RetirementCalculatorCard = () => {
         
         return (
              <p className="text-xs text-muted-foreground p-3 bg-secondary/50 rounded-md">
-                Based on your current plan, you may face a shortfall of <strong className="text-red-500">₹{results.shortfall.toLocaleString('en-IN', {maximumFractionDigits: 0})}</strong>. 
-                Consider increasing your monthly contribution by approximately <strong className="text-white">₹{additionalMonthlyContribution.toLocaleString('en-IN', {maximumFractionDigits: 0})}</strong> or exploring higher return investment options.
+                Based on your current plan, you may face a shortfall of <strong className="text-red-500">${results.shortfall.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>. 
+                Consider increasing your monthly contribution by approximately <strong className="text-white">${additionalMonthlyContribution.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong> or exploring higher return investment options.
             </p>
         );
     }
@@ -843,9 +843,9 @@ const RetirementCalculatorCard = () => {
                         <div className="space-y-2 p-4 border rounded-lg">
                            <CalculatorInputRow label="Current Age" placeholder="e.g. 30" value={inputs.currentAge} onChange={handleInputChange('currentAge')} />
                            <CalculatorInputRow label="Retirement Age" placeholder="e.g. 60" value={inputs.retirementAge} onChange={handleInputChange('retirementAge')} />
-                           <CalculatorInputRow label="Current Savings (₹)" placeholder="e.g. 500000" value={inputs.currentSavings} onChange={handleInputChange('currentSavings')} />
-                           <CalculatorInputRow label="Monthly Contribution (₹)" placeholder="e.g. 15000" value={inputs.monthlyContribution} onChange={handleInputChange('monthlyContribution')} />
-                           <CalculatorInputRow label="Monthly Current Expense (₹)" placeholder="e.g. 50000" value={inputs.monthlyExpense} onChange={handleInputChange('monthlyExpense')} />
+                           <CalculatorInputRow label="Current Savings ($)" placeholder="e.g. 500000" value={inputs.currentSavings} onChange={handleInputChange('currentSavings')} />
+                           <CalculatorInputRow label="Monthly Contribution ($)" placeholder="e.g. 15000" value={inputs.monthlyContribution} onChange={handleInputChange('monthlyContribution')} />
+                           <CalculatorInputRow label="Monthly Current Expense ($)" placeholder="e.g. 50000" value={inputs.monthlyExpense} onChange={handleInputChange('monthlyExpense')} />
                            <CalculatorInputRow label="Expected Return (%)" placeholder="e.g. 10" value={inputs.expectedReturn} onChange={handleInputChange('expectedReturn')} />
                            <CalculatorInputRow label="Inflation Rate (%)" placeholder="e.g. 6" value={inputs.inflationRate} onChange={handleInputChange('inflationRate')} />
                         </div>
@@ -1134,7 +1134,7 @@ export function DepositsDashboard({ userId }: { userId: string }) {
                                                         <BorderedCell rowSpan={2} className="align-top">{deposit.startDate}</BorderedCell>
                                                         <BorderedCell rowSpan={2} className="text-left align-top">{deposit.familyMember}</BorderedCell>
                                                         <BorderedCell rowSpan={2} className="text-left align-top">{deposit.bankName}</BorderedCell>
-                                                        <BorderedCell rowSpan={2} className="text-right font-mono align-top">₹ {formatCurrency(deposit.principal, false)}</BorderedCell>
+                                                        <BorderedCell rowSpan={2} className="text-right font-mono align-top">$ {formatCurrency(deposit.principal, false)}</BorderedCell>
                                                         <BorderedCell className="text-center">{deposit.period.years}</BorderedCell>
                                                         <BorderedCell className="text-center">{deposit.period.months}</BorderedCell>
                                                         <BorderedCell className="text-center">{deposit.period.days}</BorderedCell>
@@ -1168,16 +1168,16 @@ export function DepositsDashboard({ userId }: { userId: string }) {
                                                          </BorderedCell>
                                                     </TableRow>
                                                     <TableRow>
-                                                        <BorderedCell className="text-center text-muted-foreground text-xs" colSpan={3}>No. of Days: {deposit.numberOfDays} | Rate: {deposit.interestRate.toFixed(2)}% | Interest: ₹ {formatCurrency(deposit.interestAmount)} | Maturity: ₹ {formatCurrency(deposit.maturityAmount)}</BorderedCell>
+                                                        <BorderedCell className="text-center text-muted-foreground text-xs" colSpan={3}>No. of Days: {deposit.numberOfDays} | Rate: {deposit.interestRate.toFixed(2)}% | Interest: $ {formatCurrency(deposit.interestAmount)} | Maturity: $ {formatCurrency(deposit.maturityAmount)}</BorderedCell>
                                                     </TableRow>
                                                 </React.Fragment>
                                             ))}
                                             <TableRow>
                                                 <BorderedCell colSpan={3} className="text-right font-bold bg-muted/50">Total for {familyMember}</BorderedCell>
-                                                <BorderedCell className="text-right font-mono font-bold bg-muted/50">₹ {formatCurrency(subtotalPrincipal, false)}</BorderedCell>
+                                                <BorderedCell className="text-right font-mono font-bold bg-muted/50">$ {formatCurrency(subtotalPrincipal, false)}</BorderedCell>
                                                 <BorderedCell colSpan={3} className="bg-muted/50" />
-                                                <BorderedCell className="text-right font-mono font-bold bg-muted/50 text-xs">Int: ₹ {formatCurrency(subtotalInterest)}</BorderedCell>
-                                                <BorderedCell className="text-right font-mono font-bold bg-muted/50 text-xs">Mat: ₹ {formatCurrency(subtotalMaturity)}</BorderedCell>
+                                                <BorderedCell className="text-right font-mono font-bold bg-muted/50 text-xs">Int: $ {formatCurrency(subtotalInterest)}</BorderedCell>
+                                                <BorderedCell className="text-right font-mono font-bold bg-muted/50 text-xs">Mat: $ {formatCurrency(subtotalMaturity)}</BorderedCell>
                                                 <BorderedCell className="bg-muted/50" />
                                             </TableRow>
                                         </React.Fragment>
@@ -1187,10 +1187,10 @@ export function DepositsDashboard({ userId }: { userId: string }) {
                             <TableFooter className="font-bold bg-muted">
                                <TableRow>
                                     <BorderedCell colSpan={3} className="text-right">Grand Total</BorderedCell>
-                                    <BorderedCell className="text-right font-mono">₹ {formatCurrency(totalPrincipal, false)}</BorderedCell>
+                                    <BorderedCell className="text-right font-mono">$ {formatCurrency(totalPrincipal, false)}</BorderedCell>
                                     <BorderedCell colSpan={3}></BorderedCell>
-                                    <BorderedCell className="text-right font-mono text-xs">Int: ₹ {formatCurrency(totalInterest)}</BorderedCell>
-                                    <BorderedCell className="text-right font-mono text-xs">Mat: ₹ {formatCurrency(totalMaturity)}</BorderedCell>
+                                    <BorderedCell className="text-right font-mono text-xs">Int: $ {formatCurrency(totalInterest)}</BorderedCell>
+                                    <BorderedCell className="text-right font-mono text-xs">Mat: $ {formatCurrency(totalMaturity)}</BorderedCell>
                                     <BorderedCell></BorderedCell>
                                </TableRow>
                             </TableFooter>

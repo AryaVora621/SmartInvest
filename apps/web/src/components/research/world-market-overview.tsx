@@ -16,15 +16,16 @@ type MarketItem = {
 };
 
 const marketSymbols: { name: string; symbol: string }[] = [
-    { name: 'BSE INDEX', symbol: '^BSESN' },
+    { name: 'S&P 500', symbol: '^GSPC' },
+    { name: 'DOW JONES', symbol: '^DJI' },
     { name: 'NASDAQ', symbol: '^IXIC' },
-    { name: 'LONDON FTSE', symbol: '^FTSE' },
-    { name: 'NIKKEI', symbol: '^N225' },
-    { name: 'SHANGHAI', symbol: '000001.SS' },
-    { name: 'NSE NIFTY', symbol: '^NSEI' },
     { name: 'NYSE', symbol: '^NYA' },
+    { name: 'RUSSELL 2000', symbol: '^RUT' },
+    { name: 'VIX', symbol: '^VIX' },
+    { name: 'US 10Y', symbol: '^TNX' },
     { name: 'CRUDE OIL', symbol: 'CL=F' },
     { name: 'GOLD', symbol: 'GC=F' },
+    { name: 'BITCOIN', symbol: 'BTC-USD' },
 ];
 
 async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; changePercent: number } | null> {
@@ -47,24 +48,11 @@ async function fetchYahooQuote(symbol: string): Promise<{ price: number; change:
     }
 }
 
-async function fetchExchangeRate(): Promise<number | null> {
-    try {
-        const res = await fetch('/api/yahoo-quote?symbol=USDINR%3DX');
-        const data = await res.json();
-        const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-        return price || null;
-    } catch {
-        return null;
-    }
-}
-
-const formatValue = (price: number, isUsd: boolean) => {
-    return (isUsd ? '$' : '₹') + price.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-};
+const formatValue = (price: number) =>
+    price.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 export function WorldMarketOverview() {
     const [marketData, setMarketData] = useState<Map<string, MarketItem>>(new Map());
-    const [exchangeRate, setExchangeRate] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [showData, setShowData] = useState(true);
 
@@ -76,7 +64,7 @@ export function WorldMarketOverview() {
                 const up = quote.change >= 0;
                 return [m.name, {
                     name: m.name,
-                    value: formatValue(quote.price, m.name !== 'BSE INDEX' && m.name !== 'NSE NIFTY'),
+                    value: formatValue(quote.price),
                     change: quote.change.toFixed(2),
                     percent: quote.changePercent.toFixed(2) + '%',
                     up,
@@ -89,8 +77,6 @@ export function WorldMarketOverview() {
             if (r) newMap.set(r[0], r[1]);
         });
         setMarketData(newMap);
-        const rate = await fetchExchangeRate();
-        if (rate) setExchangeRate(rate);
         setIsLoading(false);
     };
 
@@ -100,26 +86,10 @@ export function WorldMarketOverview() {
         return () => clearInterval(interval);
     }, []);
 
-    const topRowOrder = ['BSE INDEX', 'NASDAQ', 'LONDON FTSE', 'NIKKEI', 'SHANGHAI'];
-    const bottomRowOrder = ['NSE NIFTY', 'NYSE', 'CRUDE OIL', 'GOLD'];
+    const topRowOrder = ['S&P 500', 'DOW JONES', 'NASDAQ', 'NYSE', 'RUSSELL 2000'];
+    const bottomRowOrder = ['VIX', 'US 10Y', 'CRUDE OIL', 'GOLD', 'BITCOIN'];
 
     const renderCard = (assetName: string) => {
-        if (assetName === '1 US Dollar Equals') {
-            return (
-                <Card key={assetName} className="p-2 flex flex-col justify-center text-center h-20">
-                    <p className="text-muted-foreground uppercase truncate text-xs">USD/INR</p>
-                    {exchangeRate !== null ? (
-                        <>
-                            <p className="font-bold my-1 text-xs">{exchangeRate.toFixed(2)}</p>
-                            <p className="text-muted-foreground text-xs">Indian Rupee</p>
-                        </>
-                    ) : (
-                        <p className="font-bold my-1 text-muted-foreground text-xs">—</p>
-                    )}
-                </Card>
-            );
-        }
-
         const item = marketData.get(assetName);
         return (
             <Card key={assetName} className="p-2 flex flex-col justify-center text-center h-20">
@@ -147,7 +117,7 @@ export function WorldMarketOverview() {
             <div className="flex items-center justify-between p-2 rounded-lg bg-background text-foreground">
                 <div className="flex items-center gap-1">
                     <Globe size={16} />
-                    <h3 className="font-semibold text-xs">World Market Overview</h3>
+                    <h3 className="font-semibold text-xs">US Market Overview</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     <p className="text-xs text-white">{dateStr}</p>
@@ -160,7 +130,7 @@ export function WorldMarketOverview() {
 
             {isLoading && marketData.size === 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-                    {Array(9).fill(0).map((_, i) => (
+                    {Array(10).fill(0).map((_, i) => (
                         <Card key={i} className="p-2 flex flex-col justify-center items-center text-center h-20">
                             <div className="animate-pulse bg-muted rounded h-2 w-12 mb-1" />
                             <div className="animate-pulse bg-muted rounded h-2 w-16 mb-1" />
@@ -177,7 +147,6 @@ export function WorldMarketOverview() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                         {bottomRowOrder.map(renderCard)}
-                        {renderCard('1 US Dollar Equals')}
                     </div>
                 </>
             )}

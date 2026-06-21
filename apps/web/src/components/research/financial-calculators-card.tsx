@@ -21,7 +21,7 @@ const CalculatorInput = ({ label, value, onChange, placeholder, name }: { label:
 const ResultField = ({ label, value }: { label: string, value: string | number }) => (
     <div className="flex justify-between items-center text-sm p-2 bg-muted/50 rounded-md">
         <span>{label}</span>
-        <span className="font-semibold">{typeof value === 'number' ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : value}</span>
+        <span className="font-semibold">{typeof value === 'number' ? value.toLocaleString('en-US', { maximumFractionDigits: 2 }) : value}</span>
     </div>
 );
 
@@ -106,23 +106,23 @@ const UptrendCalculator = ({ stock, userId }: { stock: Stock, userId: string }) 
             <div className="space-y-3 p-4 border rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4">
                     <CalculatorInput label="Date" name="date" value={inputs.date} onChange={handleInputChange} />
-                    <CalculatorInput label="Company Name" name="companyName" value={inputs.companyName} onChange={handleInputChange} placeholder="e.g., Reliance Industries" />
+                    <CalculatorInput label="Company Name" name="companyName" value={inputs.companyName} onChange={handleInputChange} placeholder="e.g., Apple" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <CalculatorInput label="Current Market Cap (cr)" name="currentMarketCap" value={inputs.currentMarketCap} onChange={handleInputChange} placeholder="e.g., 5724" />
+                    <CalculatorInput label="Current Market Cap ($B)" name="currentMarketCap" value={inputs.currentMarketCap} onChange={handleInputChange} placeholder="e.g., 5724" />
                     <CalculatorInput label="Current Share Price" name="currentSharePrice" value={inputs.currentSharePrice} onChange={handleInputChange} placeholder="e.g., 752" />
                     <CalculatorInput label="Fair PE" name="fairPE" value={inputs.fairPE} onChange={handleInputChange} placeholder="e.g., 15.9" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <CalculatorInput label="TTM Sales (Cr.)" name="ttmSales" value={inputs.ttmSales} onChange={handleInputChange} placeholder="e.g., 1000" />
-                    <CalculatorInput label="TTM Net Profit (Cr.)" name="ttmNetProfit" value={inputs.ttmNetProfit} onChange={handleInputChange} placeholder="e.g., 100" />
-                    <CalculatorInput label="Last Quarter Profit (Cr)" name="lastQuarterProfit" value={inputs.lastQuarterProfit} onChange={handleInputChange} placeholder="e.g., 90" />
+                    <CalculatorInput label="TTM Sales ($B)" name="ttmSales" value={inputs.ttmSales} onChange={handleInputChange} placeholder="e.g., 1000" />
+                    <CalculatorInput label="TTM Net Profit ($B)" name="ttmNetProfit" value={inputs.ttmNetProfit} onChange={handleInputChange} placeholder="e.g., 100" />
+                    <CalculatorInput label="Last Quarter Profit ($B)" name="lastQuarterProfit" value={inputs.lastQuarterProfit} onChange={handleInputChange} placeholder="e.g., 90" />
                     <Button onClick={calculate} className="w-full h-9">Calculate</Button>
                 </div>
             </div>
             <div className="space-y-2">
-                <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}cr` : 'N/A'} />
-                <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}cr` : 'N/A'} />
+                <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}B` : 'N/A'} />
+                <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}B` : 'N/A'} />
                 <ResultField label="Upside Potential" value={results.upsidePotential !== null ? `${(results.upsidePotential * 100).toFixed(2)}%` : 'N/A'} />
                 <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `$${results.expectedPrice.toFixed(2)}` : 'N/A'} />
                  {results.expectedPrice !== null && (
@@ -215,22 +215,22 @@ const LargeOrderCalculator = ({ stock, userId }: { stock: Stock, userId: string 
                     <CalculatorInput label="Company Name" name="companyName" value={inputs.companyName} onChange={handleInputChange} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <CalculatorInput label="Market Cap (cr)" name="marketCap" value={inputs.marketCap} onChange={handleInputChange} />
+                    <CalculatorInput label="Market Cap ($B)" name="marketCap" value={inputs.marketCap} onChange={handleInputChange} />
                     <CalculatorInput label="Share Price" name="sharePrice" value={inputs.sharePrice} onChange={handleInputChange} />
                     <CalculatorInput label="Fair PE" name="fairPE" value={inputs.fairPE} onChange={handleInputChange} />
-                    <CalculatorInput label="TTM Sales (Cr.)" name="ttmSales" value={inputs.ttmSales} onChange={handleInputChange} placeholder="e.g., 1000" />
+                    <CalculatorInput label="TTM Sales ($B)" name="ttmSales" value={inputs.ttmSales} onChange={handleInputChange} placeholder="e.g., 1000" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <CalculatorInput label="TTM Net Profit (Cr.)" name="ttmNetProfit" value={inputs.ttmNetProfit} onChange={handleInputChange} placeholder="e.g., 100" />
-                    <CalculatorInput label="Current Orderbook (cr)" name="currentOrderbook" value={inputs.currentOrderbook} onChange={handleInputChange} placeholder="e.g., 234" />
+                    <CalculatorInput label="TTM Net Profit ($B)" name="ttmNetProfit" value={inputs.ttmNetProfit} onChange={handleInputChange} placeholder="e.g., 100" />
+                    <CalculatorInput label="Current Orderbook ($B)" name="currentOrderbook" value={inputs.currentOrderbook} onChange={handleInputChange} placeholder="e.g., 234" />
                     <CalculatorInput label="Timeline (months)" name="timeline" value={inputs.timeline} onChange={handleInputChange} placeholder="e.g., 10" />
                     <Button onClick={calculate} className="w-full h-9">Calculate</Button>
                 </div>
             </div>
             <div className="space-y-2">
-                <ResultField label="Exp. 1Y Forward Sales" value={results.forwardSales !== null ? `${results.forwardSales.toFixed(2)}cr` : 'N/A'} />
-                <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}cr` : 'N/A'} />
-                <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}cr` : 'N/A'} />
+                <ResultField label="Exp. 1Y Forward Sales" value={results.forwardSales !== null ? `${results.forwardSales.toFixed(2)}B` : 'N/A'} />
+                <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}B` : 'N/A'} />
+                <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}B` : 'N/A'} />
                 <ResultField label="Upside Potential" value={results.upsidePotential !== null ? `${(results.upsidePotential * 100).toFixed(2)}%` : 'N/A'} />
                 <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `$${results.expectedPrice.toFixed(2)}` : 'N/A'} />
                  {results.expectedPrice !== null && (
@@ -322,21 +322,21 @@ const CapacityExpansionCalculator = ({ stock, userId }: { stock: Stock, userId: 
                     <CalculatorInput label="Company Name" name="companyName" value={inputs.companyName} onChange={handleInputChange} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <CalculatorInput label="Market Cap (cr)" name="marketCap" value={inputs.marketCap} onChange={handleInputChange} />
+                    <CalculatorInput label="Market Cap ($B)" name="marketCap" value={inputs.marketCap} onChange={handleInputChange} />
                     <CalculatorInput label="Share Price" name="sharePrice" value={inputs.sharePrice} onChange={handleInputChange} />
                     <CalculatorInput label="Fair PE" name="fairPE" value={inputs.fairPE} onChange={handleInputChange} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <CalculatorInput label="TTM Sales (cr)" name="ttmSales" value={inputs.ttmSales} onChange={handleInputChange} placeholder="e.g., 180.8" />
-                     <CalculatorInput label="TTM Net Profit (Cr.)" name="ttmNetProfit" value={inputs.ttmNetProfit} onChange={handleInputChange} placeholder="e.g., 20.3" />
+                    <CalculatorInput label="TTM Sales ($B)" name="ttmSales" value={inputs.ttmSales} onChange={handleInputChange} placeholder="e.g., 180.8" />
+                     <CalculatorInput label="TTM Net Profit ($B)" name="ttmNetProfit" value={inputs.ttmNetProfit} onChange={handleInputChange} placeholder="e.g., 20.3" />
                     <CalculatorInput label="Percent Increase in Capacity (%)" name="percentIncrease" value={inputs.percentIncrease} onChange={handleInputChange} placeholder="e.g., 60.8" />
                     <Button onClick={calculate} className="w-full h-9">Calculate</Button>
                 </div>
             </div>
             <div className="space-y-2">
-                <ResultField label="Exp. 1Y Forward Sales" value={results.forwardSales !== null ? `${results.forwardSales.toFixed(2)}cr` : 'N/A'} />
-                <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}cr` : 'N/A'} />
-                <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}cr` : 'N/A'} />
+                <ResultField label="Exp. 1Y Forward Sales" value={results.forwardSales !== null ? `${results.forwardSales.toFixed(2)}B` : 'N/A'} />
+                <ResultField label="Exp. 1Y Forward Net Profit" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}B` : 'N/A'} />
+                <ResultField label="Exp. 1Y Forward Market Cap" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}B` : 'N/A'} />
                 <ResultField label="Upside Potential" value={results.upsidePotential !== null ? `${(results.upsidePotential * 100).toFixed(2)}%` : 'N/A'} />
                 <ResultField label="Exp. Price After 1 Year" value={results.expectedPrice !== null ? `$${results.expectedPrice.toFixed(2)}` : 'N/A'} />
                  {results.expectedPrice !== null && (
@@ -399,7 +399,7 @@ const PreferentialCalculator = ({ stock, userId }: { stock: Stock, userId: strin
 
         if (isNaN(mc) || isNaN(sp) || isNaN(ps) || isNaN(pp) || isNaN(cu) || isNaN(at) || isNaN(fPE) || sp === 0 || isNaN(ttmSales) || isNaN(ttmProfit)) return;
         
-        const capitalRaised = (ps * pp) / 10000000; // in Cr
+        const capitalRaised = (ps * pp) / 1e9; // in $B
         const assetCreationAmount = capitalRaised * (cu / 100);
         const additionalRevenue = assetCreationAmount * at;
         const oldRevenue = ttmSales;
@@ -481,13 +481,13 @@ const PreferentialCalculator = ({ stock, userId }: { stock: Stock, userId: strin
                     <CalculatorInput label="Company Name" name="companyName" value={inputs.companyName} onChange={handleInputChange} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <CalculatorInput label="Market Cap (cr)" name="marketCap" value={inputs.marketCap} onChange={handleInputChange} />
+                    <CalculatorInput label="Market Cap ($B)" name="marketCap" value={inputs.marketCap} onChange={handleInputChange} />
                     <CalculatorInput label="Share Price" name="sharePrice" value={inputs.sharePrice} onChange={handleInputChange} />
                     <CalculatorInput label="Fair PE" name="fairPE" value={inputs.fairPE} onChange={handleInputChange} />
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <CalculatorInput label="TTM Sales (cr)" name="ttmSales" value={inputs.ttmSales} onChange={handleInputChange} />
-                    <CalculatorInput label="TTM Net Profit (cr)" name="ttmNetProfit" value={inputs.ttmNetProfit} onChange={handleInputChange} />
+                    <CalculatorInput label="TTM Sales ($B)" name="ttmSales" value={inputs.ttmSales} onChange={handleInputChange} />
+                    <CalculatorInput label="TTM Net Profit ($B)" name="ttmNetProfit" value={inputs.ttmNetProfit} onChange={handleInputChange} />
                     <CalculatorInput label="Fixed Asset Turnover" name="assetTurnover" value={inputs.assetTurnover} onChange={handleInputChange} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -498,16 +498,16 @@ const PreferentialCalculator = ({ stock, userId }: { stock: Stock, userId: strin
                 </div>
             </div>
             <div className="space-y-2">
-                <ResultField label="Preferential Amount Raised:" value={results.capitalRaised !== null ? `${results.capitalRaised.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="Part of The Preferential Amount That Will Be Used For Asset Creation:" value={results.assetCreationAmount !== null ? `${results.assetCreationAmount.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="Revenue That Will Be Generated From Increase In Asset:" value={results.additionalRevenue !== null ? `${results.additionalRevenue.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="Old Revenue:" value={results.oldRevenue !== null ? `${results.oldRevenue.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="New Revenue:" value={results.newRevenue !== null ? `${results.newRevenue.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="Expected 1 Year Forward Net Profit:" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="Expected 1 Year Forward Market Cap:" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="Visible Market Cap:" value={results.visibleMarketCap !== null ? `${results.visibleMarketCap.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="Hidden Market Cap:" value={results.hiddenMarketCap !== null ? `${results.hiddenMarketCap.toFixed(2)}Cr` : '0Cr'} />
-                <ResultField label="Current Actual Market Cap:" value={results.currentMarketCap !== null ? `${results.currentMarketCap.toFixed(2)}Cr` : '0Cr'} />
+                <ResultField label="Preferential Amount Raised:" value={results.capitalRaised !== null ? `${results.capitalRaised.toFixed(2)}B` : '0B'} />
+                <ResultField label="Part of The Preferential Amount That Will Be Used For Asset Creation:" value={results.assetCreationAmount !== null ? `${results.assetCreationAmount.toFixed(2)}B` : '0B'} />
+                <ResultField label="Revenue That Will Be Generated From Increase In Asset:" value={results.additionalRevenue !== null ? `${results.additionalRevenue.toFixed(2)}B` : '0B'} />
+                <ResultField label="Old Revenue:" value={results.oldRevenue !== null ? `${results.oldRevenue.toFixed(2)}B` : '0B'} />
+                <ResultField label="New Revenue:" value={results.newRevenue !== null ? `${results.newRevenue.toFixed(2)}B` : '0B'} />
+                <ResultField label="Expected 1 Year Forward Net Profit:" value={results.forwardProfit !== null ? `${results.forwardProfit.toFixed(2)}B` : '0B'} />
+                <ResultField label="Expected 1 Year Forward Market Cap:" value={results.forwardMarketCap !== null ? `${results.forwardMarketCap.toFixed(2)}B` : '0B'} />
+                <ResultField label="Visible Market Cap:" value={results.visibleMarketCap !== null ? `${results.visibleMarketCap.toFixed(2)}B` : '0B'} />
+                <ResultField label="Hidden Market Cap:" value={results.hiddenMarketCap !== null ? `${results.hiddenMarketCap.toFixed(2)}B` : '0B'} />
+                <ResultField label="Current Actual Market Cap:" value={results.currentMarketCap !== null ? `${results.currentMarketCap.toFixed(2)}B` : '0B'} />
                 <ResultField label="Upside Potential:" value={results.upsidePotential !== null ? `${(results.upsidePotential * 100).toFixed(2)}%` : '0%'} />
                 <ResultField label="Expected Price After 1 Year:" value={results.expectedPrice !== null ? `$${results.expectedPrice.toFixed(2)}` : '$0'} />
                  {results.expectedPrice !== null && (
